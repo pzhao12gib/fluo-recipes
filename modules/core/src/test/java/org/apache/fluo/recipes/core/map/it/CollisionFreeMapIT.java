@@ -29,23 +29,23 @@ import org.apache.fluo.api.client.Snapshot;
 import org.apache.fluo.api.client.Transaction;
 import org.apache.fluo.api.client.scanner.CellScanner;
 import org.apache.fluo.api.config.FluoConfiguration;
+import org.apache.fluo.api.config.ObserverSpecification;
 import org.apache.fluo.api.data.Column;
 import org.apache.fluo.api.data.RowColumnValue;
 import org.apache.fluo.api.data.Span;
 import org.apache.fluo.api.mini.MiniFluo;
+import org.apache.fluo.recipes.core.map.CollisionFreeMap;
 import org.apache.fluo.recipes.core.serialization.SimpleSerializer;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-@Deprecated
-// TODO migrate to CombineQueue test when removing CFM
 public class CollisionFreeMapIT {
 
   private MiniFluo miniFluo;
 
-  private org.apache.fluo.recipes.core.map.CollisionFreeMap<String, Long> wcMap;
+  private CollisionFreeMap<String, Long> wcMap;
 
   static final String MAP_ID = "wcm";
 
@@ -58,19 +58,16 @@ public class CollisionFreeMapIT {
     props.setWorkerThreads(20);
     props.setMiniDataDir("target/mini");
 
-    props.addObserver(
-        new org.apache.fluo.api.config.ObserverSpecification(DocumentObserver.class.getName()));
+    props.addObserver(new ObserverSpecification(DocumentObserver.class.getName()));
 
     SimpleSerializer.setSerializer(props, TestSerializer.class);
 
-    org.apache.fluo.recipes.core.map.CollisionFreeMap.configure(props,
-        new org.apache.fluo.recipes.core.map.CollisionFreeMap.Options(MAP_ID,
-            WordCountCombiner.class, WordCountObserver.class, String.class, Long.class, 17));
+    CollisionFreeMap.configure(props, new CollisionFreeMap.Options(MAP_ID, WordCountCombiner.class,
+        WordCountObserver.class, String.class, Long.class, 17));
 
     miniFluo = FluoFactory.newMiniFluo(props);
 
-    wcMap = org.apache.fluo.recipes.core.map.CollisionFreeMap.getInstance(MAP_ID,
-        props.getAppConfiguration());
+    wcMap = CollisionFreeMap.getInstance(MAP_ID, props.getAppConfiguration());
   }
 
   @After
@@ -105,6 +102,7 @@ public class CollisionFreeMapIT {
     Map<String, Long> counts = new HashMap<>();
 
     try (Snapshot snap = fc.newSnapshot()) {
+
 
       CellScanner scanner =
           snap.scanner().over(Span.prefix("d:")).fetch(new Column("content", "current")).build();

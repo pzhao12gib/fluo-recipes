@@ -22,9 +22,7 @@ import org.apache.fluo.api.observer.Observer;
 
 /**
  * @since 1.0.0
- * @deprecated since 1.1.0 replaced by {@link org.apache.fluo.recipes.core.export.function.Exporter}
  */
-@Deprecated
 public abstract class Exporter<K, V> {
 
   public interface Context {
@@ -73,4 +71,6 @@ public abstract class Exporter<K, V> {
    *
    */
   protected abstract void processExports(Iterator<SequencedExport<K, V>> exports);
+
+  // TODO add close
 }

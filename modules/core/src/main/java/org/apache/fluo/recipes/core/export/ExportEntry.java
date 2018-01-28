@@ -15,7 +15,6 @@
 
 package org.apache.fluo.recipes.core.export;
 
-// This class intentionally package private.
 class ExportEntry {
   byte[] key;
   long seq;

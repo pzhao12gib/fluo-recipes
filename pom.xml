@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
   Licensed to the Apache Software Foundation (ASF) under one or more contributor license
   agreements. See the NOTICE file distributed with this work for additional information regarding
@@ -18,12 +17,12 @@
   <parent>
     <groupId>org.apache.fluo</groupId>
     <artifactId>fluo-parent</artifactId>
-    <version>3</version>
+    <version>1-incubating</version>
   </parent>
   <artifactId>fluo-recipes</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.0.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>Apache Fluo Recipes Parent</name>
+  <name>Apache Fluo (incubating) Recipes Parent</name>
   <description>Implementation of Common Fluo patterns</description>
   <licenses>
     <license>
@@ -40,20 +39,20 @@
     <module>modules/test</module>
   </modules>
   <scm>
-    <connection>scm:git:https://gitbox.apache.org/repos/asf/fluo-recipes.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/fluo-recipes.git</developerConnection>
+    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-fluo-recipes.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-fluo-recipes.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://gitbox.apache.org/repos/asf/fluo-recipes.git</url>
+    <url>https://git-wip-us.apache.org/repos/asf/incubator-fluo-recipes.git</url>
   </scm>
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/apache/fluo-recipes/issues</url>
+    <url>https://github.com/apache/incubator-fluo-recipes/issues</url>
   </issueManagement>
   <properties>
     <accumulo.version>1.6.6</accumulo.version>
     <curator.version>2.7.1</curator.version>
     <findbugs.maxRank>13</findbugs.maxRank>
-    <fluo.version>1.1.0-incubating</fluo.version>
+    <fluo.version>1.0.0-incubating</fluo.version>
     <hadoop.version>2.6.3</hadoop.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -67,7 +66,9 @@
      -->
     <thrift.version>0.9.1</thrift.version>
     <zookeeper.version>3.4.8</zookeeper.version>
-  </properties>
+  <gib.referenceBranch>HEAD^1</gib.referenceBranch>
+        <gib.enabled>true</gib.enabled>
+    </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -245,6 +246,35 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>accumulo-api-check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <checkstyleRules>
+                <module name="Checker">
+                  <module name="TreeWalker">
+                    <module name="AvoidStarImport"/>
+                    <module name="RegexpSinglelineJava">
+                      <!--check that only Accumulo public APIs are imported-->
+                      <property name="format" value="import\s+org\.apache\.accumulo\.(.*\.(impl|thrift)\..*|(?!core|minicluster).*|core\.(?!client|data|iterators|security\.Authorizations|security\.ColumnVisibility|util\.format\.Formatter).*|core\.data\.(?!Key|Mutation|Value|Range|Condition|ConditionalMutation|ByteSequence|PartialKey|ColumnUpdate|ArrayByteSequence).*)"/>
+                      <property name="ignoreComments" value="true"/>
+                      <property name="message" value="Accumulo non-public classes imported"/>
+                    </module>
+                  </module>
+                </module>
+              </checkstyleRules>
+              <failOnViolation>true</failOnViolation>
+              <outputFile>${project.build.directory}/checkstyle-results-accumulo.xml</outputFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
@@ -268,7 +298,14 @@
         </executions>
       </plugin>
     </plugins>
-  </build>
+  <extensions>
+            <extension>
+                <groupId>com.vackosar.gitflowincrementalbuilder</groupId>
+                <artifactId>gitflow-incremental-builder</artifactId>
+                <version>3.4</version>
+            </extension>
+        </extensions>
+    </build>
   <profiles>
     <profile>
       <id>fluo-recipes-release</id>
@@ -283,3 +320,4 @@
     </profile>
   </profiles>
 </project>
+

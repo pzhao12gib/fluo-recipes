@@ -22,19 +22,17 @@ import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import org.apache.fluo.api.data.Bytes;
 import org.apache.fluo.api.data.Column;
+import org.apache.fluo.recipes.core.map.CollisionFreeMap;
 import org.apache.fluo.recipes.core.types.TypedObserver;
 import org.apache.fluo.recipes.core.types.TypedTransactionBase;
 
-@Deprecated
-// TODO move to CombineQueue test when removing CFM
 public class DocumentObserver extends TypedObserver {
 
-  org.apache.fluo.recipes.core.map.CollisionFreeMap<String, Long> wcm;
+  CollisionFreeMap<String, Long> wcm;
 
   @Override
   public void init(Context context) throws Exception {
-    wcm = org.apache.fluo.recipes.core.map.CollisionFreeMap.getInstance(CollisionFreeMapIT.MAP_ID,
-        context.getAppConfiguration());
+    wcm = CollisionFreeMap.getInstance(CollisionFreeMapIT.MAP_ID, context.getAppConfiguration());
   }
 
   @Override
@@ -78,8 +76,8 @@ public class DocumentObserver extends TypedObserver {
     MapDifference<String, Long> diffs = Maps.difference(currCounts, newCounts);
 
     // compute the diffs for words that changed
-    changes.putAll(Maps.transformValues(diffs.entriesDiffering(),
-        vDiff -> vDiff.rightValue() - vDiff.leftValue()));
+    changes.putAll(Maps.transformValues(diffs.entriesDiffering(), vDiff -> vDiff.rightValue()
+        - vDiff.leftValue()));
 
     // add all new words
     changes.putAll(diffs.entriesOnlyOnRight());

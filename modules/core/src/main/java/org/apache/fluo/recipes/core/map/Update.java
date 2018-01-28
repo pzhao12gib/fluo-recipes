@@ -15,17 +15,11 @@
 
 package org.apache.fluo.recipes.core.map;
 
-import java.util.Iterator;
 import java.util.Optional;
-
-import com.google.common.collect.Iterators;
-import org.apache.fluo.recipes.core.combine.ChangeObserver.Change;
 
 /**
  * @since 1.0.0
- * @deprecated since 1.1.0
  */
-@Deprecated
 public class Update<K, V> {
 
   private final K key;
@@ -48,10 +42,5 @@ public class Update<K, V> {
 
   public Optional<V> getOldValue() {
     return oldValue;
-  }
-
-  static <K2, V2> Iterator<Update<K2, V2>> transform(Iterable<Change<K2, V2>> changes) {
-    return Iterators.transform(changes.iterator(),
-        change -> new Update<K2, V2>(change.getKey(), change.getOldValue(), change.getNewValue()));
   }
 }

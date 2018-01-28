@@ -27,11 +27,10 @@ import org.apache.accumulo.core.data.Mutation;
 import org.apache.fluo.api.data.Bytes;
 import org.apache.fluo.api.data.Column;
 import org.apache.fluo.api.data.RowColumn;
-import org.apache.fluo.recipes.accumulo.export.function.AccumuloTranslator;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AccumuloTranslatorTest {
+public class AccumuloExportTest {
 
   public static Map<RowColumn, Bytes> genData(String key, Optional<String> val) {
     if (!val.isPresent()) {
@@ -48,7 +47,7 @@ public class AccumuloTranslatorTest {
 
   public static void genMutations(String key, long seq, Optional<String> oldVal,
       Optional<String> newVal, Consumer<Mutation> consumer) {
-    AccumuloTranslator.generateMutations(seq, genData(key, oldVal), genData(key, newVal), consumer);
+    AccumuloExporter.generateMutations(seq, genData(key, oldVal), genData(key, newVal), consumer);
   }
 
   public static Mutation makePut(String key, String val, long seq) {
