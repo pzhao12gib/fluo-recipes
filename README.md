@@ -20,19 +20,16 @@ limitations under the License.
 
 **Fluo Recipes are common code for [Apache Fluo][fluo] application developers.**
 
-Fluo Recipes build on the [Fluo API][fluo-api] to offer additional functionality to
-developers. They are published separately from Fluo on their own release schedule.
+Fluo Recipes build on the [Fluo API][fluo-api] to offer additinal functionality to
+developers. They are published seperately from Fluo on their own release schedule.
 This allows Fluo Recipes to iterate and innovate faster than Fluo (which will maintain
-a more minimal API on a slower release cycle). Fluo Recipes offers code to implement
-common patterns on top of Fluo's API.  It also offers glue code to external libraries
-like Spark and Kryo.
+a more minimal API on a slower release cycle).
 
 ### Documentation
 
 Recipes are documented below and in the [Recipes API docs][recipes-api].
 
-* [Combine Queue][combine-q] - A recipe for concurrently updating many keys while avoiding
-  collisions.
+* [Collision Free Map][cfm] - A recipe for making many to many updates.
 * [Export Queue][export-q] - A recipe for exporting data from Fluo to external systems.
 * [Row Hash Prefix][row-hasher] - A recipe for spreading data evenly in a row prefix.
 * [RecordingTransaction][recording-tx] - A wrapper for a Fluo transaction that records all transaction
@@ -44,7 +41,6 @@ Recipes have common needs that are broken down into the following reusable compo
 * [Serialization][serialization] - Common code for serializing POJOs. 
 * [Transient Ranges][transient] - Standardized process for dealing with transient data.
 * [Table optimization][optimization] - Standardized process for optimizing the Fluo table.
-* [Spark integration][spark] - Spark+Fluo integration code.
 
 ### Usage
 
@@ -62,7 +58,7 @@ Below is a sample Maven POM containing all possible Fluo Recipes dependencies:
 
 ```xml
   <properties>
-    <fluo-recipes.version>1.1.0-incubating</fluo-recipes.version>
+    <fluo-recipes.version>1.0.0-incubating</fluo-recipes.version>
   </properties>
 
   <dependencies>
@@ -103,16 +99,15 @@ Below is a sample Maven POM containing all possible Fluo Recipes dependencies:
 [fluo]: https://fluo.apache.org/
 [fluo-api]: https://fluo.apache.org/apidocs/fluo/
 [recipes-api]: https://fluo.apache.org/apidocs/fluo-recipes/
-[combine-q]: docs/combine-queue.md
+[cfm]: docs/cfm.md
 [export-q]: docs/export-queue.md
 [recording-tx]: docs/recording-tx.md
 [serialization]: docs/serialization.md
 [transient]: docs/transient.md
 [optimization]: docs/table-optimization.md
 [row-hasher]: docs/row-hasher.md
-[spark]: docs/spark.md
 [testing]: docs/testing.md
-[ti]: https://travis-ci.org/apache/fluo-recipes.svg?branch=master
-[tl]: https://travis-ci.org/apache/fluo-recipes
+[ti]: https://travis-ci.org/apache/incubator-fluo-recipes.svg?branch=master
+[tl]: https://travis-ci.org/apache/incubator-fluo-recipes
 [li]: http://img.shields.io/badge/license-ASL-blue.svg
-[ll]: https://github.com/apache/fluo-recipes/blob/master/LICENSE
+[ll]: https://github.com/apache/incubator-fluo-recipes/blob/master/LICENSE

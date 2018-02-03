@@ -20,9 +20,9 @@
     <version>1-incubating</version>
   </parent>
   <artifactId>fluo-recipes</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.0.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>Apache Fluo Recipes Parent</name>
+  <name>Apache Fluo (incubating) Recipes Parent</name>
   <description>Implementation of Common Fluo patterns</description>
   <licenses>
     <license>
@@ -39,20 +39,20 @@
     <module>modules/test</module>
   </modules>
   <scm>
-    <connection>scm:git:https://gitbox.apache.org/repos/asf/fluo-recipes.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/fluo-recipes.git</developerConnection>
+    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-fluo-recipes.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-fluo-recipes.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://gitbox.apache.org/repos/asf/fluo-recipes.git</url>
+    <url>https://git-wip-us.apache.org/repos/asf/incubator-fluo-recipes.git</url>
   </scm>
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/apache/fluo-recipes/issues</url>
+    <url>https://github.com/apache/incubator-fluo-recipes/issues</url>
   </issueManagement>
   <properties>
     <accumulo.version>1.6.6</accumulo.version>
     <curator.version>2.7.1</curator.version>
     <findbugs.maxRank>13</findbugs.maxRank>
-    <fluo.version>1.1.0-incubating</fluo.version>
+    <fluo.version>1.0.0-incubating</fluo.version>
     <hadoop.version>2.6.3</hadoop.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -66,8 +66,10 @@
      -->
     <thrift.version>0.9.1</thrift.version>
     <zookeeper.version>3.4.8</zookeeper.version>
-  <gib.referenceBranch>HEAD^1</gib.referenceBranch>
+  <gib.commitRange>${env.TRAVIS_COMMIT_RANGE}</gib.commitRange>
         <gib.enabled>true</gib.enabled>
+        <gib.useEkstazi>false</gib.useEkstazi>
+        <gib.excludePathRegex>(.*\.apt$)|(.*\.txt$)|(.*\.md$)|(.*\.html$)|(.*\.rst$)|(.*\.scss$)|(.*\.css$)|(.*\.png$)|(.*\.py$)|(.*README$)|(.*\.jpg$)|(.*\.jpeg$)|(.*NOTICE$)|(.*\.gitignore$)</gib.excludePathRegex>
     </properties>
   <dependencyManagement>
     <dependencies>
@@ -241,18 +243,6 @@
             </systemPropertyVariables>
           </configuration>
         </plugin>
-        <plugin>
-          <groupId>net.revelc.code</groupId>
-          <artifactId>impsort-maven-plugin</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <groups>java.,javax.</groups>
-            <staticAfter>true</staticAfter>
-            <excludes>
-              <exclude>**/thrift/*.java</exclude>
-            </excludes>
-          </configuration>
-        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -309,24 +299,12 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>net.revelc.code</groupId>
-        <artifactId>impsort-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>sort-imports</id>
-            <goals>
-              <goal>sort</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   <extensions>
             <extension>
-                <groupId>com.vackosar.gitflowincrementalbuilder</groupId>
-                <artifactId>gitflow-incremental-builder</artifactId>
-                <version>3.4</version>
+                <groupId>edu.illinois</groupId>
+                <artifactId>incremental-builder-with-ekstazi</artifactId>
+                <version>3.5.0</version>
             </extension>
         </extensions>
     </build>

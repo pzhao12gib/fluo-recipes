@@ -22,7 +22,6 @@ import com.google.common.base.Strings;
 import org.apache.fluo.api.client.TransactionBase;
 import org.apache.fluo.api.client.scanner.CellScanner;
 import org.apache.fluo.api.data.Bytes;
-import org.apache.fluo.api.data.Bytes.BytesBuilder;
 import org.apache.fluo.api.data.Column;
 import org.apache.fluo.api.data.RowColumn;
 import org.apache.fluo.api.data.RowColumnValue;
@@ -34,7 +33,6 @@ import org.apache.fluo.recipes.core.types.TypedTransactionBase;
 /**
  * This class encapsulates a buckets serialization code.
  */
-// This class intentionally package private.
 class ExportBucket {
   private static final String NOTIFICATION_CF = "fluoRecipes";
   private static final String NOTIFICATION_CQ_PREFIX = "eq:";
@@ -92,15 +90,17 @@ class ExportBucket {
     this.qid = bucketRow.subSequence(0, colonLoc).toString();
   }
 
-  private static void encSeq(BytesBuilder bb, long l) {
-    bb.append((byte) (l >>> 56));
-    bb.append((byte) (l >>> 48));
-    bb.append((byte) (l >>> 40));
-    bb.append((byte) (l >>> 32));
-    bb.append((byte) (l >>> 24));
-    bb.append((byte) (l >>> 16));
-    bb.append((byte) (l >>> 8));
-    bb.append((byte) (l >>> 0));
+  private static byte[] encSeq(long l) {
+    byte[] ret = new byte[8];
+    ret[0] = (byte) (l >>> 56);
+    ret[1] = (byte) (l >>> 48);
+    ret[2] = (byte) (l >>> 40);
+    ret[3] = (byte) (l >>> 32);
+    ret[4] = (byte) (l >>> 24);
+    ret[5] = (byte) (l >>> 16);
+    ret[6] = (byte) (l >>> 8);
+    ret[7] = (byte) (l >>> 0);
+    return ret;
   }
 
   private static long decodeSeq(Bytes seq) {
@@ -111,18 +111,17 @@ class ExportBucket {
   }
 
   public void add(long seq, byte[] key, byte[] value) {
-    BytesBuilder builder =
-        Bytes.builder(bucketRow.length() + 1 + key.length + 8).append(bucketRow).append(':')
-            .append(key);
-    encSeq(builder, seq);
-    ttx.set(builder.toBytes(), EXPORT_COL, Bytes.of(value));
+    Bytes row =
+        Bytes.builder(bucketRow.length() + 1 + key.length + 8).append(bucketRow).append(":")
+            .append(key).append(encSeq(seq)).toBytes();
+    ttx.set(row, EXPORT_COL, Bytes.of(value));
   }
 
   /**
    * Computes the minimial row for a bucket
    */
   private Bytes getMinimalRow() {
-    return Bytes.builder(bucketRow.length() + 1).append(bucketRow).append(':').toBytes();
+    return Bytes.builder(bucketRow.length() + 1).append(bucketRow).append(":").toBytes();
   }
 
   public void notifyExportObserver() {
@@ -191,11 +190,10 @@ class ExportBucket {
   }
 
   public void setContinueRow(ExportEntry ee) {
-    BytesBuilder builder =
-        Bytes.builder(bucketRow.length() + 1 + ee.key.length + 8).append(bucketRow).append(':')
-            .append(ee.key);
-    encSeq(builder, ee.seq);
-    Bytes nextRow = builder.toBytes();
+    Bytes nextRow =
+        Bytes.builder(bucketRow.length() + 1 + ee.key.length + 8).append(bucketRow).append(":")
+            .append(ee.key).append(encSeq(ee.seq)).toBytes();
+
     ttx.set(getMinimalRow(), NEXT_COL, nextRow);
   }
 

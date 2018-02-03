@@ -36,20 +36,18 @@ import org.apache.fluo.api.client.scanner.CellScanner;
 import org.apache.fluo.api.client.scanner.ColumnScanner;
 import org.apache.fluo.api.client.scanner.RowScanner;
 import org.apache.fluo.api.config.FluoConfiguration;
+import org.apache.fluo.api.config.ObserverSpecification;
 import org.apache.fluo.api.data.Column;
 import org.apache.fluo.api.data.ColumnValue;
 import org.apache.fluo.api.data.Span;
 import org.apache.fluo.api.mini.MiniFluo;
-import org.apache.fluo.api.observer.ObserverProvider;
 import org.apache.fluo.recipes.core.export.ExportQueue;
+import org.apache.fluo.recipes.core.export.Exporter;
 import org.apache.fluo.recipes.core.export.SequencedExport;
-import org.apache.fluo.recipes.core.export.function.Exporter;
 import org.apache.fluo.recipes.core.serialization.SimpleSerializer;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-
-import static org.apache.fluo.api.observer.Observer.NotificationType.STRONG;
 
 public class ExportTestBase {
 
@@ -97,7 +95,7 @@ public class ExportTestBase {
     }
   }
 
-  public static class RefExporter implements Exporter<String, RefUpdates> {
+  public static class RefExporter extends Exporter<String, RefUpdates> {
 
     public static final String QUEUE_ID = "req";
 
@@ -107,7 +105,7 @@ public class ExportTestBase {
     }
 
     @Override
-    public void export(Iterator<SequencedExport<String, RefUpdates>> exportIterator) {
+    protected void processExports(Iterator<SequencedExport<String, RefUpdates>> exportIterator) {
       ArrayList<SequencedExport<String, RefUpdates>> exportList = new ArrayList<>();
       Iterators.addAll(exportList, exportIterator);
 
@@ -137,19 +135,6 @@ public class ExportTestBase {
     return null;
   }
 
-  public static class ExportTestObserverProvider implements ObserverProvider {
-
-    @Override
-    public void provide(Registry or, Context ctx) {
-      ExportQueue<String, RefUpdates> refExportQueue =
-          ExportQueue.getInstance(RefExporter.QUEUE_ID, ctx.getAppConfiguration());
-
-      or.forColumn(new Column("content", "new"), STRONG).useObserver(
-          new DocumentObserver(refExportQueue));
-      refExportQueue.registerObserver(or, new RefExporter());
-    }
-  }
-
   @Before
   public void setUpFluo() throws Exception {
     FileUtils.deleteQuietly(new File("target/mini"));
@@ -158,17 +143,21 @@ public class ExportTestBase {
     props.setApplicationName("eqt");
     props.setWorkerThreads(20);
     props.setMiniDataDir("target/mini");
-    props.setObserverProvider(ExportTestObserverProvider.class);
+
+    ObserverSpecification doc = new ObserverSpecification(DocumentObserver.class.getName());
+    props.addObserver(doc);
 
     SimpleSerializer.setSerializer(props, GsonSerializer.class);
 
-    if (getBufferSize() == null) {
-      ExportQueue.configure(RefExporter.QUEUE_ID).keyType(String.class).valueType(RefUpdates.class)
-          .buckets(getNumBuckets()).save(props);
-    } else {
-      ExportQueue.configure(RefExporter.QUEUE_ID).keyType(String.class).valueType(RefUpdates.class)
-          .buckets(getNumBuckets()).bufferSize(getBufferSize()).save(props);
+    ExportQueue.Options exportQueueOpts =
+        new ExportQueue.Options(RefExporter.QUEUE_ID, RefExporter.class, String.class,
+            RefUpdates.class, getNumBuckets());
+
+    if (getBufferSize() != null) {
+      exportQueueOpts.setBufferSize(getBufferSize());
     }
+
+    ExportQueue.configure(props, exportQueueOpts);
 
     miniFluo = FluoFactory.newMiniFluo(props);
 

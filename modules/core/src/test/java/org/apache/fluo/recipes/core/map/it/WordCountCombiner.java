@@ -18,9 +18,9 @@ package org.apache.fluo.recipes.core.map.it;
 import java.util.Iterator;
 import java.util.Optional;
 
-@Deprecated
-// TODO move to CombineQueue test when removing CFM
-public class WordCountCombiner implements org.apache.fluo.recipes.core.map.Combiner<String, Long> {
+import org.apache.fluo.recipes.core.map.Combiner;
+
+public class WordCountCombiner implements Combiner<String, Long> {
   @Override
   public Optional<Long> combine(String key, Iterator<Long> updates) {
     long sum = 0;

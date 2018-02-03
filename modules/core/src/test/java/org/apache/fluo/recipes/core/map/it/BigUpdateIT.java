@@ -37,6 +37,10 @@ import org.apache.fluo.api.data.Column;
 import org.apache.fluo.api.data.ColumnValue;
 import org.apache.fluo.api.data.Span;
 import org.apache.fluo.api.mini.MiniFluo;
+import org.apache.fluo.recipes.core.map.CollisionFreeMap;
+import org.apache.fluo.recipes.core.map.Combiner;
+import org.apache.fluo.recipes.core.map.Update;
+import org.apache.fluo.recipes.core.map.UpdateObserver;
 import org.apache.fluo.recipes.core.serialization.SimpleSerializer;
 import org.apache.fluo.recipes.core.types.StringEncoder;
 import org.apache.fluo.recipes.core.types.TypeLayer;
@@ -51,19 +55,16 @@ import org.junit.Test;
  * This test configures a small buffer size and verifies that multiple passes are made to process
  * updates.
  */
-@Deprecated
-// TODO migrate to CombineQueue test when removing CFM
 public class BigUpdateIT {
   private static final TypeLayer tl = new TypeLayer(new StringEncoder());
 
   private MiniFluo miniFluo;
 
-  private org.apache.fluo.recipes.core.map.CollisionFreeMap<String, Long> wcMap;
+  private CollisionFreeMap<String, Long> wcMap;
 
   static final String MAP_ID = "bu";
 
-  public static class LongCombiner implements
-      org.apache.fluo.recipes.core.map.Combiner<String, Long> {
+  public static class LongCombiner implements Combiner<String, Long> {
 
     @Override
     public Optional<Long> combine(String key, Iterator<Long> updates) {
@@ -77,18 +78,17 @@ public class BigUpdateIT {
 
   private static AtomicInteger globalUpdates = new AtomicInteger(0);
 
-  public static class MyObserver extends
-      org.apache.fluo.recipes.core.map.UpdateObserver<String, Long> {
+  public static class MyObserver extends UpdateObserver<String, Long> {
 
     @Override
-    public void updatingValues(TransactionBase tx,
-        Iterator<org.apache.fluo.recipes.core.map.Update<String, Long>> updates) {
+    public void updatingValues(TransactionBase tx, Iterator<Update<String, Long>> updates) {
       TypedTransactionBase ttx = tl.wrap(tx);
 
       Map<String, Long> expectedOld = new HashMap<>();
 
+
       while (updates.hasNext()) {
-        org.apache.fluo.recipes.core.map.Update<String, Long> update = updates.next();
+        Update<String, Long> update = updates.next();
 
         if (update.getOldValue().isPresent()) {
           expectedOld.put("side:" + update.getKey(), update.getOldValue().get());
@@ -122,15 +122,12 @@ public class BigUpdateIT {
 
     SimpleSerializer.setSerializer(props, TestSerializer.class);
 
-    org.apache.fluo.recipes.core.map.CollisionFreeMap.configure(props,
-        new org.apache.fluo.recipes.core.map.CollisionFreeMap.Options(MAP_ID, LongCombiner.class,
-            MyObserver.class, String.class, Long.class, 2).setBufferSize(1 << 10));
+    CollisionFreeMap.configure(props, new CollisionFreeMap.Options(MAP_ID, LongCombiner.class,
+        MyObserver.class, String.class, Long.class, 2).setBufferSize(1 << 10));
 
     miniFluo = FluoFactory.newMiniFluo(props);
 
-    wcMap =
-        org.apache.fluo.recipes.core.map.CollisionFreeMap.getInstance(MAP_ID,
-            props.getAppConfiguration());
+    wcMap = CollisionFreeMap.getInstance(MAP_ID, props.getAppConfiguration());
 
     globalUpdates.set(0);
   }

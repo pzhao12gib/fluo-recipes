@@ -18,14 +18,9 @@ package org.apache.fluo.recipes.core.map;
 import java.util.Iterator;
 import java.util.Optional;
 
-import org.apache.fluo.recipes.core.combine.CombineQueue;
-
 /**
  * @since 1.0.0
- * @deprecated since 1.1.0 use {@link org.apache.fluo.recipes.core.combine.Combiner} and
- *             {@link CombineQueue}
  */
-@Deprecated
 public interface Combiner<K, V> {
 
   /**
